@@ -1,7 +1,7 @@
 /*
  WiFiEsp example: WebServer
 
- A simple web server that shows the value of the analog input 
+ A simple web server that shows the value of the analog input
  pins via a web page using an ESP8266 module.
  This sketch will print the IP address of your ESP8266 module (once connected)
  to the Serial monitor. From there, you can open that address in a web browser
@@ -22,12 +22,12 @@ SoftwareSerial Serial1(2, 3); // RX, TX
 #define trig 8
 #define echo 9
 
-char ssid[] = "jjjj";            // your network SSID (name)
-char pass[] = "1077996919";        // your network password
+char ssid[] = "WIFI_NAME";            // your network SSID (name)
+char pass[] = "WIFI_PASSWORD";        // your network password
 int status = WL_IDLE_STATUS;     // the Wifi radio's status
 int reqCount = 0;                // number of requests received
 
-WiFiEspServer server(80);
+WiFiEspServer server(5000);
 
 
 void setup()
@@ -58,9 +58,9 @@ void setup()
   printWifiStatus();
 
   Serial.println("초음파 센서 시작");
-  pinMode(trig, OUTPUT);   
-  pinMode(echo, INPUT);  
-  
+  pinMode(trig, OUTPUT);
+  pinMode(echo, INPUT);
+
   // start the web server on port 80
   server.begin();
 }
@@ -76,23 +76,23 @@ void loop()
     boolean currentLineIsBlank = true;
     while (client.connected()) {
       if (client.available()) {
-        
-        
+
+
         char c = client.read();
         Serial.write(c);
         // so you can send a reply
         if (c == '\n' && currentLineIsBlank) {
           Serial.println("Sending response");
 
-          long duration, distance;   
-           digitalWrite(trig, LOW);       
-          delayMicroseconds(2);           
-          digitalWrite(trig, HIGH);  
-          delayMicroseconds(10);            
-          digitalWrite(trig, LOW);      
-          duration = pulseIn(echo, HIGH);  
+          long duration, distance;
+           digitalWrite(trig, LOW);
+          delayMicroseconds(2);
+          digitalWrite(trig, HIGH);
+          delayMicroseconds(10);
+          digitalWrite(trig, LOW);
+          duration = pulseIn(echo, HIGH);
           distance = duration * 170 / 1000;
-         
+
           String content = "{\"distance\": " + String(distance) + "}";
           client.println("HTTP/1.1 200 OK\r\n");
 //          client.println("Accept: */*");
@@ -104,7 +104,7 @@ void loop()
 //            "HTTP/1.1 200 OK\r\n"
 //            "Content-Type: text/html\r\n"
 //            "Connection: close\r\n"  // the connection will be closed after completion of the response
-//            "Refresh: 20\r\n"  
+//            "Refresh: 20\r\n"
 //            "\r\n");
 //          client.print(distance);
           break;
@@ -139,7 +139,7 @@ void printWifiStatus()
   IPAddress ip = WiFi.localIP();
   Serial.print("IP Address: ");
   Serial.println(ip);
-  
+
   // print where to go in the browser
   Serial.println();
   Serial.print("To see this page in action, open a browser to http://");

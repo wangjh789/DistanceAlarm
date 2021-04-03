@@ -5,19 +5,18 @@ import 'package:flutter/material.dart';
 import 'package:vibrate/vibrate.dart';
 
 class ShowDistanceScreen extends StatefulWidget {
-
   ShowDistanceScreen(this.ipAddr);
 
   final String ipAddr;
-
 
   @override
   _ShowDistanceScreenState createState() => _ShowDistanceScreenState();
 }
 
 class _ShowDistanceScreenState extends State<ShowDistanceScreen> {
-
   Future<dynamic> _future;
+
+  int standardDistance = 2000;
 
   bool _canVibrate = true;
   final Iterable<Duration> pauses = [
@@ -36,21 +35,20 @@ class _ShowDistanceScreenState extends State<ShowDistanceScreen> {
     });
   }
 
-  Future<dynamic> getDistance()async{
+  Future<dynamic> getDistance() async {
     var url = Uri.parse(widget.ipAddr);
-    var response = await http.get(url,headers: {"Accept": "application/json"});
+    var response = await http.get(url, headers: {"Accept": "application/json"});
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {
       throw Exception('Failed to load post');
     }
-
   }
 
   setUpTimedFetch() {
     Timer.periodic(Duration(milliseconds: 1000), (timer) {
       print("--request--");
-      if(this.mounted){
+      if (this.mounted) {
         setState(() {
           _future = getDistance();
         });
@@ -70,21 +68,34 @@ class _ShowDistanceScreenState extends State<ShowDistanceScreen> {
     return Scaffold(
       body: FutureBuilder(
         future: _future,
-        builder: (context,snapshot){
-          if(snapshot.hasError){
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
             print(snapshot.error);
-            return Center(child: Text("Error"),);
+            return Center(
+              child: Text("Error"),
+            );
           }
           // print(snapshot.toString());
 
-          if(!snapshot.hasData){
-            return Center(child: Text("No Data"),);
+          if (!snapshot.hasData) {
+            return Center(
+              child: Text("No Data"),
+            );
           }
-          if(snapshot.data['distance'] < 100){
+          bool temp = false;
+          if (snapshot.data['distance'] < standardDistance) {
             print("vibrate------");
             Vibrate.vibrate();
+            temp = true;
           }
-          return Center(child: Text(snapshot.data['distance'].toString()),);
+          return Container(
+              color: temp ? Colors.red : null,
+              child: Center(
+                child: Text(
+                  snapshot.data['distance'].toString(),
+                  style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+                ),
+              ));
         },
       ),
     );
