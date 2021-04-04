@@ -30,6 +30,8 @@ dependencies:
   cupertino_icons: ^1.0.2
   http: ^0.13.1
   vibrate: ^0.0.4
+  flutter_beep: ^0.2.0
+  screen: ^0.0.5
 
 dev_dependencies:
   flutter_test:

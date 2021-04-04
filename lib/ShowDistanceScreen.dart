@@ -1,13 +1,18 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter_beep/flutter_beep.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:screen/screen.dart';
 import 'package:vibrate/vibrate.dart';
 
+enum Result{Error,In,Out}
+
 class ShowDistanceScreen extends StatefulWidget {
-  ShowDistanceScreen(this.ipAddr);
+  ShowDistanceScreen(this.ipAddr,this.standardDistance);
 
   final String ipAddr;
+  final int standardDistance;
 
   @override
   _ShowDistanceScreenState createState() => _ShowDistanceScreenState();
@@ -15,8 +20,7 @@ class ShowDistanceScreen extends StatefulWidget {
 
 class _ShowDistanceScreenState extends State<ShowDistanceScreen> {
   Future<dynamic> _future;
-
-  int standardDistance = 2000;
+  Result result;
 
   bool _canVibrate = true;
   final Iterable<Duration> pauses = [
@@ -61,6 +65,7 @@ class _ShowDistanceScreenState extends State<ShowDistanceScreen> {
     super.initState();
     setUpTimedFetch();
     vibrateConfig();
+    Screen.isKeptOn;
   }
 
   @override
@@ -69,8 +74,13 @@ class _ShowDistanceScreenState extends State<ShowDistanceScreen> {
       body: FutureBuilder(
         future: _future,
         builder: (context, snapshot) {
+
+          result = Result.Out;
+
           if (snapshot.hasError) {
+            result = Result.Error;
             print(snapshot.error);
+            FlutterBeep.beep();
             return Center(
               child: Text("Error"),
             );
@@ -82,14 +92,14 @@ class _ShowDistanceScreenState extends State<ShowDistanceScreen> {
               child: Text("No Data"),
             );
           }
-          bool temp = false;
-          if (snapshot.data['distance'] < standardDistance) {
+          if (snapshot.data['distance'] < widget.standardDistance) {
             print("vibrate------");
             Vibrate.vibrate();
-            temp = true;
+            FlutterBeep.playSysSound(AndroidSoundIDs.TONE_CDMA_ABBR_ALERT);
+            result = Result.In;
           }
           return Container(
-              color: temp ? Colors.red : null,
+              color: result==Result.Error ? Colors.yellow : result==Result.In?Colors.red:null,
               child: Center(
                 child: Text(
                   snapshot.data['distance'].toString(),
